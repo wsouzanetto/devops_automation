@@ -289,5 +289,4 @@ Execute:
 chmod +x exporta.sh usa_variavel.sh
 ./exporta.sh
 ```
-
 ---
