@@ -22,7 +22,8 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
   - processos
   - pacotes
   - rede
-
+- Vi Essencial:
+  - Comandos básico
 ---
 
 ## 🐳 Módulo 2 – Containers com Docker
