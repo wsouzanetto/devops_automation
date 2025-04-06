@@ -1,4 +1,4 @@
-# Linux Essencial para Automação
+# 🧪 Linux Essencial para Automação
 
 Este lab é focado nos comandos Linux mais usados em scripts de automação com Shell Scripts e pipelines.
 
@@ -15,7 +15,7 @@ Vamos praticar:
 
 ---
 
-## Preparando ambiente de labs
+## 🔧 Preparando ambiente de labs
 
 Execute este bloco uma única vez para criar a estrutura base dos labs:
 
@@ -26,7 +26,140 @@ cd ~/labs/linux/projeto
 
 ---
 
+## Lab 1 - Navegação no terminal
+
+```bash
+pwd               # Mostra o caminho atual
+ls -la            # Lista tudo com detalhes
+cd scripts        # Entra na pasta de scripts
+cd ..             # Volta para projeto
+```
+
+Ver estrutura:
+```bash
+tree ~/labs/linux/projeto
+```
+
+---
+
+## Lab 2 - Permissões de arquivos e execução
+
+```bash
+cd ~/labs/linux/projeto/scripts
+touch run.sh
+chmod +x run.sh
+ls -l
+```
+
+Adicione conteúdo no script:
+```bash
+echo -e '#!/bin/bash\necho "Script executado"' > run.sh
+./run.sh
+```
+
+---
+
+## Lab 3 - Processos e monitoração
+
+```bash
+top            # Pressione q para sair
+ps aux | grep bash
+```
+
+Crie um processo em segundo plano:
+```bash
+sleep 300 &
+ps aux | grep sleep
+kill -9 <PID>   # Substitua <PID> pelo ID real
+```
+
+---
+
+## Lab 4 - Instalação de pacotes
+
+```bash
+sudo apt update
+sudo apt install -y curl git jq net-tools tree
+```
+
+Use os comandos instalados:
+```bash
+curl ifconfig.me
+ip a
+tree ~/labs/linux
+```
+
+---
+
+## Lab 5 - Redirecionamento e arquivos
+
+```bash
+cd ~/labs/linux/projeto/dados
+echo "linha 1" > resultado.txt
+echo "linha 2" >> resultado.txt
+cat resultado.txt
+```
+
+Filtrar dados:
+```bash
+cat resultado.txt | grep linha
+```
+
+---
+
+## Lab 6 - Filtros de texto com `cut`, `awk`, `sed`
+
+```bash
+echo "nome,email,idade" | cut -d',' -f2
+
+echo "usuario:x:1000:1000::/home/usuario:/bin/bash" | awk -F: '{print $1}'
+
+echo "nome antigo" | sed 's/antigo/novo/'
+```
+
+---
+
+## Lab 7 - Parse de JSON com `jq`
+
+```bash
+curl -s https://api.github.com/repos/docker/docker-ce | jq '.name, .language'
+```
+
+Filtrar um objeto:
+```bash
+curl -s https://api.github.com/repos/hashicorp/terraform | jq '{nome: .name, linguagem: .language}'
+```
+
+---
+
 ## Lab 8 - Variáveis em shell scripts
+
+Crie um script:
+```bash
+cd ~/labs/linux/projeto/scripts
+echo -e '#!/bin/bash\nNOME="DevOps"\necho "Bem-vindo, $NOME"' > saudacao.sh
+chmod +x saudacao.sh
+./saudacao.sh
+```
+
+Crie um script com entrada externa:
+```bash
+echo -e '#!/bin/bash\nARQUIVO=$1\necho "Rodando script..." > $ARQUIVO' > gravar.sh
+chmod +x gravar.sh
+./gravar.sh ../dados/resultado.txt
+cat ../dados/resultado.txt
+```
+
+Execute este bloco uma única vez para criar a estrutura base dos labs:
+
+```bash
+mkdir -p ~/labs/linux/projeto/{scripts,logs,dados}
+cd ~/labs/linux/projeto
+```
+
+---
+
+## Lab 9 - Variáveis em shell scripts
 
 ### saudacao.sh
 ```bash
@@ -53,7 +186,7 @@ cat ../dados/resultado.txt
 
 ---
 
-## Lab 9 - Condições com if
+## Lab 10 - Condições com if
 
 ### condicional.sh
 ```bash
@@ -74,7 +207,7 @@ chmod +x condicional.sh
 
 ---
 
-## Lab 10 - Estrutura de repetição com for
+## Lab 11 - Estrutura de repetição com for
 
 ### loop.sh
 ```bash
@@ -92,7 +225,7 @@ chmod +x loop.sh
 
 ---
 
-## Lab 11 - Leitura de arquivo linha a linha
+## Lab 12 - Leitura de arquivo linha a linha
 
 Crie o arquivo:
 ```bash
@@ -115,7 +248,7 @@ chmod +x leitor.sh
 
 ---
 
-## Lab 12 - Validando se arquivo existe
+## Lab 13 - Validando se arquivo existe
 
 ### checar_arquivo.sh
 ```bash
@@ -136,7 +269,7 @@ chmod +x checar_arquivo.sh
 
 ---
 
-## Lab 13 - Exportar variável para outros scripts
+## Lab 14 - Exportar variável para outros scripts
 
 ### exporta.sh
 ```bash
@@ -156,3 +289,5 @@ Execute:
 chmod +x exporta.sh usa_variavel.sh
 ./exporta.sh
 ```
+
+---
