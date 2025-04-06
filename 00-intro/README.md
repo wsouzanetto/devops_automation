@@ -1,4 +1,4 @@
-# Pré-requisitos para o Lab DevOps Automation
+# ✅ Pré-requisitos para o Lab DevOps Automation
 
 Este documento lista os pré-requisitos necessários para acompanhar todos os módulos do curso DevOps Automation. Siga o passo a passo abaixo para garantir que seu ambiente está pronto.
 
@@ -37,6 +37,8 @@ https://aka.ms/wsl2kernel
 wsl --set-default-version 2
 ```
 - Instale o Ubuntu pela Microsoft Store
+
+Mais detalhes sempre atualizados em: https://learn.microsoft.com/pt-br/windows/wsl/install
 
 Depois, abra o Ubuntu no menu iniciar e siga os próximos passos normalmente.
 
@@ -114,7 +116,7 @@ sudo docker run hello-world
 
 ---
 
-## 5. AWS CLI e Azure CLI instaladas
+## 5. AWS CLI, Azure CLI e Bicep CLI instaladas
 
 ### AWS CLI:
 ```bash
@@ -129,6 +131,16 @@ aws --version
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 az version
 ```
+
+Documentação oficial: https://learn.microsoft.com/pt-br/cli/azure/install-azure-cli
+
+### Bicep CLI:
+```bash
+az bicep install
+bicep --version
+```
+
+Documentação oficial: https://learn.microsoft.com/pt-br/azure/azure-resource-manager/bicep/install
 
 Autentique-se:
 ```bash
