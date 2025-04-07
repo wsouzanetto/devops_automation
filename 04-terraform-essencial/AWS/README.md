@@ -136,5 +136,191 @@ Para um bucket **production**, ative:
 
 ---
 
-Quer que eu detalhe algum desses tópicos avançados?
+# Lab AWS S3 com Terraform - Estrutura Profissional
+
+## Estrutura de Arquivos
+```plaintext
+s3-lab/
+├── main.tf          # Recursos principais
+├── variables.tf     # Variáveis de entrada
+├── outputs.tf       # Saídas do módulo
+├── versions.tf      # Versões de providers
+└── terraform.tfvars # Valores das variáveis (opcional)
+```
+
+### 1. versions.tf
+```hcl
+terraform {
+  required_version = ">= 1.3.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+```
+
+### 2. variables.tf
+```hcl
+variable "bucket_name" {
+  description = "Nome único global para o bucket S3"
+  type        = string
+}
+
+variable "environment" {
+  description = "Ambiente (dev/stg/prod)"
+  type        = string
+  default     = "dev"
+}
+
+variable "enable_versioning" {
+  description = "Ativar versionamento de objetos"
+  type        = bool
+  default     = true
+}
+
+variable "allowed_ips" {
+  description = "Lista de IPs com acesso ao bucket"
+  type        = list(string)
+  default     = []
+}
+```
+
+### 3. terraform.tfvars
+```hcl
+bucket_name       = "devops-labs-bucket-12345" # Substitua pelo seu nome único
+environment       = "dev"
+enable_versioning = true
+allowed_ips       = ["189.34.123.45/32"] # Substitua pelo seu IP
+```
+
+### 4. main.tf
+```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_s3_bucket" "this" {
+  bucket = var.bucket_name
+
+  tags = {
+    Environment = var.environment
+    Terraform   = "true"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  count = var.enable_versioning ? 1 : 0
+
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_policy" "this" {
+  count = length(var.allowed_ips) > 0 ? 1 : 0
+
+  bucket = aws_s3_bucket.this.id
+  policy = data.aws_iam_policy_document.bucket_policy[0].json
+}
+
+data "aws_iam_policy_document" "bucket_policy" {
+  count = length(var.allowed_ips) > 0 ? 1 : 0
+
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+
+    effect = "Deny"
+
+    actions = [
+      "s3:*",
+    ]
+
+    resources = [
+      aws_s3_bucket.this.arn,
+      "${aws_s3_bucket.this.arn}/*"
+    ]
+
+    condition {
+      test     = "NotIpAddress"
+      variable = "aws:SourceIp"
+      values   = var.allowed_ips
+    }
+  }
+}
+```
+
+### 5. outputs.tf
+```hcl
+output "bucket_arn" {
+  description = "ARN do bucket criado"
+  value       = aws_s3_bucket.this.arn
+}
+
+output "bucket_domain_name" {
+  description = "Domínio do bucket"
+  value       = aws_s3_bucket.this.bucket_domain_name
+}
+
+output "bucket_regional_domain_name" {
+  description = "Domínio regional do bucket"
+  value       = aws_s3_bucket.this.bucket_regional_domain_name
+}
+```
+
+---
+
+## Como Executar
+```bash
+# Inicializar
+terraform init
+
+# Verificar plano
+terraform plan
+
+# Aplicar configuração
+terraform apply
+
+# Destruir recursos (quando necessário)
+terraform destroy
+```
+
+---
+
+## Melhorias Implementadas
+- Separação clara de responsabilidades por arquivo
+- Variáveis parametrizáveis com valores padrão
+- Política de segurança baseada em condições (IP)
+- Outputs úteis para integração com outros sistemas
+- Versionamento explícito de providers
+
+---
+
+### Dica de Uso:
+1. Para ambientes diferentes (dev/stg/prod), crie arquivos `.tfvars` separados:
+   - `dev.tfvars`
+   - `production.tfvars`
+2. Aplique com:
+```bash
+terraform apply -var-file="production.tfvars"
+```
+
+Quer que eu adicione algum recurso específico como:
+
+
 
