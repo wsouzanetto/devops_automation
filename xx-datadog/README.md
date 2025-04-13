@@ -4,7 +4,7 @@ Este lab mostra como criar um cluster AKS no Free Tier e configurar o agente do 
 
 ---
 
-## ✅ Etapa 1 — Criar Resource Group no Azure
+## Etapa 1 — Criar Resource Group no Azure
 ```bash
 az group create \
   --name aks-free-rg \
@@ -38,7 +38,7 @@ az aks get-credentials \
 
 ---
 
-## 📦 Etapa 4 — Adicionar repositório Helm do Datadog
+## Etapa 4 — Adicionar repositório Helm do Datadog
 ```bash
 helm repo add datadog https://helm.datadoghq.com
 helm repo update
@@ -46,7 +46,7 @@ helm repo update
 
 ---
 
-## 🔐 Etapa 5 — Criar Secret com API Key da Datadog
+## Etapa 5 — Criar Secret com API Key da Datadog
 ```bash
 kubectl create namespace datadog
 
@@ -92,9 +92,9 @@ clusterAgent:
 
 ---
 
-## 🚀 Etapa 7 — Instalar o Datadog com Helm
+## Etapa 7 — Instalar o Datadog com Helm
 ```bash
-helm install datadog-agent datadog/datadog \
+helm upgrade --install datadog-agent datadog/datadog \
   -f datadog-values.yaml \
   -n datadog
 ```
@@ -108,30 +108,112 @@ helm upgrade datadog-agent datadog/datadog \
 
 ---
 
-## ✅ Verificações após o deploy
+## Etapa 8 — Fazer o deploy da aplicação `java-api` com Datadog APM + Logs
 
-### Ver pods ativos:
-```bash
-kubectl get pods -n datadog
-```
+Crie um arquivo `deployment.yaml` com o seguinte conteúdo:
 
-### Ver logs do agente:
-```bash
-kubectl logs -n datadog -l app=datadog-agent
-```
-
-### Ver logs do Cluster Agent:
-```bash
-kubectl logs -n datadog -l app=datadog-cluster-agent
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-api
+  labels:
+    app: java-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-api
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/java-api.logs: '[{"source":"java","service":"java-api"}]'
+      labels:
+        app: java-api
+    spec:
+      containers:
+        - name: java-api
+          image: iesodias/java-api:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_ENV
+              value: dev
+            - name: DD_SERVICE
+              value: java-api
+            - name: DD_VERSION
+              value: 1.0.0
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-api
+  labels:
+    app: java-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: java-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: java-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: java-api
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
 ```
 
 ---
 
-## 🧼 Limpar host antigo (opcional)
-Se tiver hostname antigo (ex: `aks-nodepool...`), vá no painel do Datadog → Infrastructure e clique em "Delete Host" no nó antigo (em cinza).
+## Etapa 9 — Aplicar o deployment
+```bash
+kubectl apply -f deployment.yaml
+```
 
 ---
 
-Pronto! O cluster AKS está 100% integrado ao Datadog com métricas, logs e painel interativo. Agora é só criar dashboards e aproveitar o monitoramento 🔥
+## Etapa 10 — Obter IP público da aplicação
+```bash
+kubectl get svc java-api
+```
+Acesse via browser ou curl:
+```bash
+curl http://<IP_PUBLICO>
+```
 
-Se quiser posso te entregar um dashboard custom pronto também!
+---
+
+## Etapa 11 — Visualizar no Datadog
+- Vá em **APM > Services** e veja os traces da aplicação `java-api`
+- Vá em **Logs > Explorer** e filtre por `source:java` ou `service:java-api`
+
+---
+
+🔥 Pronto! Agora você tem uma aplicação Java no AKS monitorada com APM, logs e autoscaling totalmente integrados no Datadog.
