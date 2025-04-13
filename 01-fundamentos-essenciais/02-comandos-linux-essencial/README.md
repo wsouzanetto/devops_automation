@@ -97,7 +97,7 @@ tree ~/labs/linux
 cd ~/labs/linux/projeto/dados
 echo "linha 1" > resultado.txt
 echo "linha 2" >> resultado.txt
-cat resultado.txt
+cacat resultado.txt
 ```
 
 Filtrar dados:
@@ -122,7 +122,7 @@ echo "nome antigo" | sed 's/antigo/novo/'
 ## Lab 7 - Parse de JSON com `jq`
 
 ```bash
-curl -s https://api.github.com/repos/docker/docker-ce | jq '.name, .language'
+curl -s https://api.github.com/repositories/91851756 | jq '.name, .language'
 ```
 
 Filtrar um objeto:
@@ -133,33 +133,6 @@ curl -s https://api.github.com/repos/hashicorp/terraform | jq '{nome: .name, lin
 ---
 
 ## Lab 8 - Variáveis em shell scripts
-
-Crie um script:
-```bash
-cd ~/labs/linux/projeto/scripts
-echo -e '#!/bin/bash\nNOME="DevOps"\necho "Bem-vindo, $NOME"' > saudacao.sh
-chmod +x saudacao.sh
-./saudacao.sh
-```
-
-Crie um script com entrada externa:
-```bash
-echo -e '#!/bin/bash\nARQUIVO=$1\necho "Rodando script..." > $ARQUIVO' > gravar.sh
-chmod +x gravar.sh
-./gravar.sh ../dados/resultado.txt
-cat ../dados/resultado.txt
-```
-
-Execute este bloco uma única vez para criar a estrutura base dos labs:
-
-```bash
-mkdir -p ~/labs/linux/projeto/{scripts,logs,dados}
-cd ~/labs/linux/projeto
-```
-
----
-
-## Lab 9 - Variáveis em shell scripts
 
 ### saudacao.sh
 ```bash
@@ -274,7 +247,7 @@ chmod +x checar_arquivo.sh
 ### exporta.sh
 ```bash
 #!/bin/bash
-export NOME_GLOBAL="LinuxPro"
+export NOME_GLOBAL="DevopsBooster"
 ./usa_variavel.sh
 ```
 
