@@ -6,9 +6,7 @@ Este lab mostra como criar um cluster AKS no Free Tier e configurar o agente do 
 
 ## Etapa 1 — Criar Resource Group no Azure
 ```bash
-az group create \
-  --name aks-free-rg \
-  --location eastus
+az group create --name aks-free-rg --location eastus
 ```
 
 ---
@@ -30,10 +28,7 @@ az aks create \
 
 ## 🔑 Etapa 3 — Acessar o Cluster via kubectl
 ```bash
-az aks get-credentials \
-  --resource-group aks-free-rg \
-  --name aks-free-cluster \
-  --overwrite-existing
+az aks get-credentials --resource-group aks-free-rg --name aks-free-cluster --overwrite-existing
 ```
 
 ---
@@ -119,6 +114,9 @@ metadata:
   name: java-api
   labels:
     app: java-api
+    tags.datadoghq.com/env: dev
+    tags.datadoghq.com/service: java-api
+    tags.datadoghq.com/version: "1.0.0"
 spec:
   replicas: 1
   selector:
@@ -126,10 +124,15 @@ spec:
       app: java-api
   template:
     metadata:
-      annotations:
-        ad.datadoghq.com/java-api.logs: '[{"source":"java","service":"java-api"}]'
       labels:
         app: java-api
+        tags.datadoghq.com/env: dev
+        tags.datadoghq.com/service: java-api
+        tags.datadoghq.com/version: "1.0.0"
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        ad.datadoghq.com/java-api.logs: '[{"source":"java","service":"java-api"}]'
+        admission.datadoghq.com/java-lib.version: v1.48.1
     spec:
       containers:
         - name: java-api
@@ -137,16 +140,8 @@ spec:
           ports:
             - containerPort: 8081
           env:
-            - name: DD_AGENT_HOST
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
-            - name: DD_ENV
-              value: dev
-            - name: DD_SERVICE
-              value: java-api
-            - name: DD_VERSION
-              value: 1.0.0
+            - name: DD_LOGS_INJECTION
+              value: "true"
           resources:
             requests:
               cpu: 100m

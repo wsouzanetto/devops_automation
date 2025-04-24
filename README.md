@@ -4,29 +4,16 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
 
 ---
 
-## 🔧 Módulo 1 – Fundamentos Essenciais
+## Módulo 1 – Fundamentos Essenciais
 **Objetivo:** nivelar o conhecimento da turma e garantir o domínio das ferramentas básicas
 
 - Introdução ao curso e ao mundo DevOps
-- Git na prática:
-  - clone
-  - add
-  - commit
-  - push
-  - branch
-  - merge
-  - pull request no GitHub
 - Comandos Linux essenciais:
-  - navegação
-  - permissões
-  - processos
-  - pacotes
-  - rede
-- Vi Essencial:
-  - Comandos básico
+- Vi Essencial
+
 ---
 
-## 🐳 Módulo 2 – Containers com Docker
+## Módulo 2 – Containers com Docker
 **Objetivo:** preparar o ambiente com containers e entender como usar imagens
 
 - Conceitos de container na prática
@@ -46,7 +33,7 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
 
 ---
 
-## 🔁 Módulo 4 – Automação com Terraform
+## Módulo 4 – Automação com Terraform
 **Objetivo:** provisionar infraestrutura como código nas nuvens
 
 - Conceito de IaC
@@ -57,7 +44,7 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
 
 ---
 
-## 🧰 Módulo 5 – Configuração com Ansible
+## Módulo 5 – Configuração com Ansible
 **Objetivo:** configurar servidores automaticamente
 
 - Conceito de configuração como código
@@ -67,7 +54,7 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
 
 ---
 
-## 🤖 Módulo 6 – CI/CD com GitHub Actions
+## Módulo 6 – CI/CD com GitHub Actions
 **Objetivo:** rodar pipelines simples com GitHub Actions
 
 - Conceito de pipeline
@@ -76,17 +63,12 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
 
 ---
 
-## 📦 Módulo 7 – CI/CD com Azure DevOps
-**Objetivo:** mostrar o poder do Azure DevOps para projetos maiores
-
-- Pipelines YAML
-- Variáveis e stages
-- **Lab:** criar uma esteira de deploy em Azure com Terraform + Ansible
-
----
-
-## ☸️ Módulo 8 – Fundamentos de Kubernetes
+## Módulo 7 – Fundamentos de Kubernetes
 **Objetivo:** entender e testar os conceitos essenciais
+
+--- 
+
+## Modulo 9 - Monitoramento e Observabilidade
 
 - O que é Kubernetes
 - Pods, Services, Deployments
