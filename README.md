@@ -24,7 +24,7 @@ Abaixo está a estrutura organizada por módulos, com foco direto na prática e 
 
 ---
 
-## ☁️ Módulo 3 – Primeiros Passos na Nuvem (AWS e Azure)
+## Módulo 3 – Primeiros Passos na Nuvem (AWS e Azure)
 **Objetivo:** aprender a subir recursos básicos na mão antes de automatizar
 
 - Overview dos principais serviços da AWS e Azure
