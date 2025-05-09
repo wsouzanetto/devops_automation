@@ -3,13 +3,13 @@
 ## Objetivo  
 Criar uma instância EC2 com Ubuntu na AWS, configurar acesso SSH e segurança básica.
 
----
+ 
 
 ## Pré-requisitos  
 - Conta AWS ativa  
 - Acesso ao [Console AWS](https://console.aws.amazon.com)  
 
----
+ 
 
 ## Passo a Passo
 
@@ -53,7 +53,7 @@ Clique em "Executar instância"
 Aguarde status "Running" (~2 minutos)
 ```
 
----
+ 
 
 ## 🔹 Configurar Elastic IP (IP Público fixo)
 
@@ -69,7 +69,7 @@ Aguarde status "Running" (~2 minutos)
 
 Após isso, o IP será fixo mesmo que a instância seja reiniciada.
 
----
+ 
 
 ## 🔹 Script de User Data (instalação automática)
 
@@ -86,7 +86,7 @@ systemctl start nginx
 
 Esse script será executado automaticamente na primeira inicialização, instalando Docker, Nginx e ativando o serviço.
 
----
+ 
 
 ## Conexão via SSH
 
@@ -108,7 +108,7 @@ Conecte com:
 ssh -i "chave-devops.ppk" ubuntu@<IP_PUBLICO>
 ```
 
----
+ 
 
 ## Comandos Úteis (Pós-Instalação)
 
@@ -122,7 +122,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y docker.io nginx
 ```
 
----
+ 
 
 ## Gerenciamento via AWS CLI
 
@@ -141,15 +141,10 @@ aws ec2 stop-instances --instance-ids i-1234567890abcdef0
 aws ec2 terminate-instances --instance-ids i-1234567890abcdef0
 ```
 
----
-
 ## Boas Práticas
 
-🔐 Nunca use regras de segurança com `0.0.0.0/0` para SSH  
+Nunca use regras de segurança com `0.0.0.0/0` para SSH  
 💸 Configure alertas de billing para evitar custos inesperados  
-🏷️ Adicione tags (ex: `Projeto=DevOps-Lab`) para organização  
-
----
 
 ## Diferenciais desta versão:
 - Foco em Ubuntu + Free Tier
@@ -157,4 +152,4 @@ aws ec2 terminate-instances --instance-ids i-1234567890abcdef0
 - Explicação de segurança crítica
 - Formatação 100% compatível com Markdown
 
----
+ 

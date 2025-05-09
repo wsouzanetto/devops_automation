@@ -217,11 +217,11 @@ Dentro do `vi`, siga estes passos:
 1. Pressione `i` para entrar no modo de inserção  
 2. Cole a função abaixo:
    ```bash
-   function d() {
-     git add .
-     git commit -m "automatic commit"
-     git push
-   }
+    function d() {
+      git add .
+      git commit -m "$1"
+      git push
+    }
    ```
 3. Pressione `ESC` para sair do modo de inserção  
 4. Digite `:wq` e pressione `ENTER` para salvar e sair

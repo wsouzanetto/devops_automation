@@ -21,70 +21,67 @@ sudo systemctl status docker
 
 ---
 
-## Lab 1 – Primeiros comandos com Docker
+## Lab Docker – Versão para SSH (Ubuntu)
 
-### 1. Executar container de teste
-```bash
-docker run hello-world
-```
+### 🎯 Objetivo
 
-Esse comando baixa a imagem `hello-world` e a executa. Serve como primeiro teste para validar a instalação.
+Executar os comandos básicos do Docker sem perder acesso ao terminal via SSH
 
 ---
 
-### 2. Listar containers ativos
+## Lab 2 – Comandos Básicos com Segurança Remota
+
+### 1. Baixar imagem do Nginx
+
+```bash
+docker pull nginx
+```
+
+### 2. Rodar container em modo detached
+
+```bash
+docker run -d --name webserver -p 8080:80 nginx
+```
+
+### 3. Verificar containers rodando
+
 ```bash
 docker ps
 ```
 
-Lista apenas os containers que estão em execução no momento.
+### 4. Verificar se está funcionando
 
----
-
-### 3. Listar todos os containers (inclusive os finalizados)
 ```bash
-docker ps -a
+curl http://localhost:8080
 ```
 
----
+### 5. Acessar o terminal do container
 
-### 4. Listar todas as imagens disponíveis
 ```bash
-docker images
+docker exec -it webserver bash
 ```
 
----
+### 6. Parar e remover o container
 
-### 5. Ver o consumo de recursos dos containers
 ```bash
-docker stats
+docker stop webserver
+docker rm webserver
 ```
 
-Mostra uso de CPU, memória e rede em tempo real.
+### 7. Remover a imagem (opcional)
 
----
+```bash
+docker rmi nginx
+```
 
-## Lab 2 – Execução interativa de containers
+### Evite comandos interativos diretos em SSH
 
-### 1. Executar container com acesso ao terminal
 ```bash
 docker run -it ubuntu bash
 ```
 
-Esse comando inicia um container Ubuntu e te dá acesso ao terminal `bash` dentro dele.
+📌 Sempre prefira `-d` e `docker exec` para ambientes remotos
 
----
-
-### 2. Testar comandos dentro do container:
-```bash
-apt update && apt install curl -y
-curl ifconfig.me
-```
-
-Depois, saia do container:
-```bash
-exit
-```
 
 ---
 
@@ -142,39 +139,31 @@ docker cp <id>:/root/arquivo.log ./arquivo.log
 
 ## Lab 6 – Visualização de logs e debug
 
-### 1. Ver logs de execução do container
-```bash
-docker logs <id>
-```
+## 📁 1. Criar estrutura do projeto
 
-### 2. Ver logs em tempo real
-```bash
-docker logs -f <id>
-```
-
-### 3. Ver configuração detalhada de um container
-```bash
-docker inspect <id>
-```
-
----
-
-## Lab 7 – Criando imagem com Dockerfile (profissional)
-
-### 1. Criar estrutura do projeto
 ```bash
 mkdir -p ~/labs/docker/app
 cd ~/labs/docker/app
 ```
 
-### 2. Criar arquivos da aplicação
+* `mkdir -p` cria o diretório principal do projeto.
+* `cd` navega até o diretório principal.
 
-Crie o arquivo principal da aplicação:
+---
+
+## ✍️ 2. Criar arquivos da aplicação
+
+### Criar o diretório e o arquivo principal:
+
 ```bash
+mkdir -p src
 touch src/index.js
 ```
 
-Abra o arquivo com seu editor favorito (por exemplo, `vi`, `nano`, `code`) e cole o seguinte conteúdo:
+* `mkdir -p src` garante que o diretório `src` existe.
+* `touch src/index.js` cria o arquivo principal da aplicação.
+
+### Editar o conteúdo do `index.js`:
 
 ```javascript
 const http = require('http');
@@ -190,14 +179,19 @@ server.listen(PORT, () => {
 });
 ```
 
-### 3. Criar `package.json`
+* Esse código cria um servidor web simples em Node.js que responde com texto puro.
 
-Crie o arquivo:
+---
+
+## 📦 3. Criar o arquivo `package.json`
+
+### Criar o arquivo:
+
 ```bash
 touch package.json
 ```
 
-Abra o `package.json` e adicione:
+### Adicionar o conteúdo abaixo ao `package.json`:
 
 ```json
 {
@@ -205,10 +199,20 @@ Abra o `package.json` e adicione:
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node index.js"
   },
   "dependencies": {}
 }
+```
+
+* Esse arquivo define as informações básicas da aplicação e o comando para iniciar.
+
+---
+```
+Pronto! Agora você tem uma aplicação Node.js com estrutura organizada, pronta para ser dockerizada. Na próxima etapa, vamos criar o `Dockerfile` e subir esse app em um container.
+
+Deseja seguir para o Dockerfile?
+
 ```
 
 
@@ -217,9 +221,9 @@ Abra o `package.json` e adicione:
 # Etapa 1: build da aplicação (instalação de dependências)
 FROM node:18-alpine AS builder
 WORKDIR /app
-COPY package.json ./
+COPY src/package.json ./
 RUN npm install
-COPY . .
+COPY src/ .
 
 # Etapa 2: imagem final
 FROM node:18-alpine
@@ -243,7 +247,7 @@ Você pode acessar a aplicação no navegador: [http://localhost:3000](http://lo
 
 ---
 
-## Lab 8 – Criando imagem multistage – Criando imagem multistage
+## Lab 8 – Criando imagem multistage
 
 ### 1. Criar estrutura
 ```bash
