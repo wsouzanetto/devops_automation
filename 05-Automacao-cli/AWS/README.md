@@ -360,14 +360,20 @@ AMI_ID=$(aws ec2 describe-images \
   --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
   --output text)
 
-# Verifica se a chave já existe localmente, senão cria
-if [ ! -f "$KEY_NAME.pem" ]; then
-  echo "Criando chave $KEY_NAME"
+# Verifica se a keypair já existe na AWS
+aws ec2 describe-key-pairs --key-names "$KEY_NAME" >/dev/null 2>&1
+
+if [ $? -ne 0 ]; then
+  echo "Criando keypair $KEY_NAME"
   aws ec2 create-key-pair --key-name "$KEY_NAME" \
     --query 'KeyMaterial' --output text > "$KEY_NAME.pem"
   chmod 400 "$KEY_NAME.pem"
 else
-  echo "Arquivo de chave $KEY_NAME.pem já existe, reutilizando"
+  echo "Keypair $KEY_NAME já existe na AWS. Pulando criação."
+  if [ ! -f "$KEY_NAME.pem" ]; then
+    echo "⚠️ Arquivo local $KEY_NAME.pem não existe. Crie manualmente ou baixe da criação original."
+    exit 1
+  fi
 fi
 
 # Criar security group
@@ -454,13 +460,6 @@ aws ec2 describe-instances \
 
 ---
 
-### 7. Fala final
-
-Muito bom com esse script conseguimos criar várias VMs com nome personalizado
-Isso mostra como loops e variáveis ajudam na automação em larga escala
-Te vejo na próxima aula
-
-
 ## Lab 12 – Script para Destruir VMs e Recursos na AWS via CLI
 
 ### 1. Objetivo
@@ -496,13 +495,17 @@ chmod +x destruir-vms.sh
 ```bash
 #!/bin/bash
 
-KEY_NAME="devops-keypair"
+export AWS_PAGER=""
+
+KEY_NAME="devops-keypair-01"
 SG_NAME="devops-sg-ie"
 
 # Lista de nomes criados
 VMS=(vm01 vm02 vm03)
 
 # Identificar os Instance IDs
+INSTANCE_IDS=()
+
 for NAME in "${VMS[@]}"; do
   INSTANCE_ID=$(aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=running,stopped" \
@@ -511,25 +514,40 @@ for NAME in "${VMS[@]}"; do
   if [ -n "$INSTANCE_ID" ]; then
     echo "Finalizando $NAME com ID $INSTANCE_ID"
     aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+    INSTANCE_IDS+=($INSTANCE_ID)
   else
-    echo "Instância $NAME não encontrada"
+    echo "Instância $NAME não encontrada ou já terminada"
   fi
 done
 
-# Aguardar finalização
-aws ec2 wait instance-terminated \
-  --filters "Name=tag:Name,Values=${VMS[*]}"
+# Aguardar finalização de TODAS as instâncias coletadas
+if [ ${#INSTANCE_IDS[@]} -gt 0 ]; then
+  echo "Aguardando término das instâncias..."
+  aws ec2 wait instance-terminated --instance-ids "${INSTANCE_IDS[@]}"
+  echo "Instâncias finalizadas com sucesso"
+else
+  echo "Nenhuma instância para aguardar término"
+fi
 
-# Deletar security group
+# Deletar security group com verificação
 SG_ID=$(aws ec2 describe-security-groups \
   --group-names "$SG_NAME" \
-  --query 'SecurityGroups[0].GroupId' --output text)
+  --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
 
-aws ec2 delete-security-group --group-id "$SG_ID"
+if [ -n "$SG_ID" ]; then
+  echo "Aguardando liberação do Security Group..."
+  sleep 10  # pequena pausa pra garantir liberação
+  aws ec2 delete-security-group --group-id "$SG_ID"
+  echo "Security group removido com sucesso"
+else
+  echo "Security group $SG_NAME não encontrado ou já removido"
+fi
 
-# Deletar chave local e remota
+# Deletar chave remota e local
 aws ec2 delete-key-pair --key-name "$KEY_NAME"
 rm -f "$KEY_NAME.pem"
+echo "Keypair e arquivo local removidos"
+
 ```
 
 ---

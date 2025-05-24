@@ -799,8 +799,6 @@ jobs:
 
 ```
 
----
-
 ### 7. Faça commit e push
 
 ```bash
@@ -809,8 +807,6 @@ git commit -m "Lab - Terraform + Ansible com botão de Destroy"
 git push origin main
 ```
 
----
-
 ## ☁️ Rodando o Lab
 
 1. Vá até a aba **Actions** do GitHub
@@ -818,16 +814,12 @@ git push origin main
 3. Clique em **Run workflow**
 4. Selecione `destroy = false` para criar ou `true` para destruir
 
----
-
 ## ✅ Resultado Esperado
 
 - Infra criada automaticamente
 - Configuração da VM com Ansible
 - Swagger disponível na porta 8081
 - Destruição simples e segura via botão do GitHub
-
----
 
 ## 🧹 Dica Final
 

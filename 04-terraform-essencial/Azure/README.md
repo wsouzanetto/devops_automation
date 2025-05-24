@@ -1,369 +1,239 @@
-# Lab Terraform - Criando Resource Group no Azure
+# Lab 1 – Criando um Resource Group com Terraform (Azure)
 
-## Objetivo
-Criar um Resource Group no Azure usando Terraform (Infraestrutura como Código).
+## 🎯 Objetivo
+Criar um Resource Group na Azure usando Terraform, passo a passo.
 
----
-
-## Pré-requisitos
-- [Azure CLI instalado](https://learn.microsoft.com/pt-br/cli/azure/install-azure-cli)
-- [Terraform instalado](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
-- Acesso a uma assinatura Azure
-
----
-
-## Passo a Passo
-
-### 1. Autenticar na Azure
+## 📁 Estrutura de Diretórios
 ```bash
-az login
+mkdir -p ~/labs/terraform/lab1-resource-group
+cd ~/labs/terraform/lab1-resource-group
 ```
 
-### 2. Criar diretório do projeto
+## 📄 Passo 1 – Criar o arquivo de provider
 ```bash
-mkdir terraform-azure-rg && cd terraform-azure-rg
+vi provider.tf
 ```
-
-### 3. Criar arquivo main.tf
+Conteúdo:
 ```hcl
-# Configure o provider Azure
 provider "azurerm" {
   features {}
 }
 
-# Crie um Resource Group
-resource "azurerm_resource_group" "devops_rg" {
-  name     = "devops-resources-rg"
-  location = "Brazil South"
-
-  tags = {
-    Environment = "Dev"
-    Team        = "DevOps"
-  }
-}
-```
-
-### 4. Criar arquivo versions.tf
-```hcl
 terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = ">= 3.0"
     }
   }
+  required_version = ">= 1.0"
 }
 ```
 
-### 5. Inicializar Terraform
+## 📄 Passo 2 – Criar o arquivo de configuração principal
+```bash
+vi main.tf
+```
+Conteúdo:
+```hcl
+resource "azurerm_resource_group" "rg" {
+  name     = "mdc-rg"
+  location = "East US"
+}
+```
+
+## ✅ Passo 3 – Inicializar o Terraform
 ```bash
 terraform init
 ```
 
-Saída esperada:
-```plaintext
-Terraform initialized successfully!
-```
-
-### 6. Verificar plano de execução
+## 🔍 Passo 4 – Validar e revisar o plano
 ```bash
+terraform validate
 terraform plan
 ```
 
-Confirme que aparecerá:
-```plaintext
-Plan: 1 to add, 0 to change, 0 to destroy.
-```
-
-### 7. Aplicar a configuração
+## 🚀 Passo 5 – Aplicar o código e provisionar
 ```bash
 terraform apply
 ```
+Confirme com `yes` quando solicitado.
 
-Digite `yes` quando solicitado.
-
-### 8. Verificar criação (CLI)
-```bash
-az group show --name devops-resources-rg --output jsonc
-```
-
----
-
-## Comandos Úteis
-
-### Listar Resource Groups via Terraform
-```bash
-terraform state list
-```
-
-### Destruir recursos
+## 🧼 Passo 6 – Destruir os recursos (opcional)
 ```bash
 terraform destroy
 ```
 
-### Limpar e validar sintaxe
+---
+
+# Lab 2 – Criando uma VM Ubuntu com Variáveis e Data Source (Azure)
+
+## 🎯 Objetivo
+Criar uma máquina virtual Ubuntu na Azure usando Terraform com variáveis e buscando o resource group existente via `data`.
+
+## 📁 Estrutura de Diretórios
 ```bash
-terraform fmt && terraform validate
+mkdir -p ~/labs/terraform/lab3-vm-variaveis
+cd ~/labs/terraform/lab3-vm-variaveis
 ```
 
----
-
-## Estrutura Final do Projeto
-```plaintext
-terraform-azure-rg/
-├── main.tf            # Configuração principal
-├── versions.tf        # Versões de providers
-├── terraform.tfstate  # Estado atual (gerado automaticamente)
-└── .terraform/        # Cache de plugins (gerado automaticamente)
+## 📄 Passo 1 – Criar o arquivo de provider
+```bash
+vi provider.tf
 ```
-
----
-
-## Melhores Práticas
-
-- ✅ **Versionamento**: Commit seus arquivos `.tf` no Git
-- ❌ **Segurança**: Nunca commit arquivos `.tfstate`
-- 🛠️ **Variáveis**: Use `variables.tf` para parametrização (exemplo abaixo)
-
-### Exemplo avançado: variables.tf
-```hcl
-variable "rg_name" {
-  description = "Nome do Resource Group"
-  default     = "devops-resources-rg"
+Conteúdo:
+```t
+provider "azurerm" {
+  features {}
 }
 
-variable "location" {
-  description = "Região Azure"
-  default     = "brazilsouth"
-}
-```
-
-Atualize o `main.tf` para usar `var.rg_name` e `var.location`
-
----
-
-## Como Customizar:
-1. Para mudar o nome do Resource Group, edite o `main.tf`
-2. Para adicionar mais recursos, inclua novos blocos `resource` após o Resource Group
-3. Para usar outras regiões, consulte [Regiões Azure](https://azure.microsoft.com/pt-br/explore/global-infrastructure/geographies/#overview)
-
----
-
-# Lab Azure Storage Account - Estrutura Profissional
-
-## Estrutura de Arquivos
-```plaintext
-storage-lab/
-├── main.tf          # Recursos principais
-├── variables.tf     # Variáveis de entrada
-├── outputs.tf       # Saídas do módulo
-├── versions.tf      # Versões de providers
-└── terraform.tfvars # Valores das variáveis
-```
-
-### 1. versions.tf
-```hcl
 terraform {
-  required_version = ">= 1.3.0"
-
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = ">= 3.0"
     }
   }
+  required_version = ">= 1.0"
 }
 ```
 
-### 2. variables.tf
+## 📄 Passo 2 – Definir variáveis
+```t
+vi variables.tf
+```
+Conteúdo:
 ```hcl
+variable "location" {
+  default = "East US"
+}
+
 variable "resource_group_name" {
-  description = "Nome do Resource Group"
-  type        = string
+  default = "mdc-rg"
 }
 
-variable "location" {
-  description = "Região Azure"
-  type        = string
-  default     = "brazilsouth"
+variable "admin_username" {
+  default = "azureuser"
 }
 
-variable "storage_account_name" {
-  description = "Nome da Storage Account (3-24 chars, alfanumérico)"
-  type        = string
-}
-
-variable "account_tier" {
-  description = "Tier da Storage Account (Standard/Premium)"
-  type        = string
-  default     = "Standard"
-}
-
-variable "account_replication_type" {
-  description = "Tipo de replicação (LRS/GRS/ZRS)"
-  type        = string
-  default     = "LRS"
-}
-
-variable "enable_https_traffic_only" {
-  description = "Forçar tráfego HTTPS"
-  type        = bool
-  default     = true
-}
-
-variable "tags" {
-  description = "Tags para recursos"
-  type        = map(string)
-  default     = {}
+variable "admin_password" {
+  default = "SenhaForte123!@#"
 }
 ```
 
-### 3. terraform.tfvars
-```hcl
-resource_group_name       = "devops-storage-rg"
-location                  = "brazilsouth"
-storage_account_name      = "devopslabstorage123" # Substitua por um nome único
-account_tier              = "Standard"
-account_replication_type  = "GRS"
-tags = {
-  Environment = "dev"
-  ManagedBy   = "Terraform"
-}
-```
-
-### 4. main.tf
-```hcl
-provider "azurerm" {
-  features {}
-}
-
-resource "azurerm_resource_group" "this" {
-  name     = var.resource_group_name
-  location = var.location
-  tags     = var.tags
-}
-
-resource "azurerm_storage_account" "this" {
-  name                     = lower(var.storage_account_name)
-  resource_group_name      = azurerm_resource_group.this.name
-  location                 = azurerm_resource_group.this.location
-  account_tier             = var.account_tier
-  account_replication_type = var.account_replication_type
-  account_kind             = "StorageV2"
-
-  enable_https_traffic_only = var.enable_https_traffic_only
-  min_tls_version            = "TLS1_2"
-  shared_access_key_enabled  = true
-
-  blob_properties {
-    versioning_enabled  = true
-    change_feed_enabled = true
-
-    container_delete_retention_policy {
-      days = 30
-    }
-  }
-
-  network_rules {
-    default_action             = "Deny"
-    ip_rules                   = ["100.0.0.0/16"] # Substitua pelos IPs permitidos
-    virtual_network_subnet_ids = []
-    bypass                     = ["AzureServices"]
-  }
-
-  tags = merge(var.tags, {
-    StorageType = "GeneralPurposeV2"
-  })
-}
-
-resource "azurerm_storage_container" "example" {
-  name                  = "devops-container"
-  storage_account_name  = azurerm_storage_account.this.name
-  container_access_type = "private"
-}
-```
-
-### 5. outputs.tf
-```hcl
-output "storage_account_id" {
-  description = "ID da Storage Account"
-  value       = azurerm_storage_account.this.id
-}
-
-output "primary_blob_endpoint" {
-  description = "Endpoint primário para Blob Storage"
-  value       = azurerm_storage_account.this.primary_blob_endpoint
-}
-
-output "primary_access_key" {
-  description = "Chave de acesso primária"
-  value       = azurerm_storage_account.this.primary_access_key
-  sensitive   = true
-}
-
-output "connection_string" {
-  description = "String de conexão"
-  value       = azurerm_storage_account.this.primary_connection_string
-  sensitive   = true
-}
-```
-
----
-
-## Como Executar
+## 📄 Passo 3 – Criar o arquivo de configuração principal
 ```bash
-# Inicializar providers
+vi main.tf
+```
+Conteúdo:
+```t
+data "azurerm_resource_group" "rg" {
+  name = var.resource_group_name
+}
+
+resource "azurerm_public_ip" "public_ip" {
+  name                = "mdc-public-ip"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Basic"
+}
+
+resource "azurerm_virtual_network" "vnet" {
+  name                = "mdc-vnet"
+  address_space       = ["10.0.0.0/16"]
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_subnet" "subnet" {
+  name                 = "mdc-subnet"
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "azurerm_network_interface" "nic" {
+  name                = "mdc-nic"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.public_ip.id
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vm" {
+  name                = "mdc-vm"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = var.location
+  size                = "Standard_B1s"
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
+  disable_password_authentication = false
+  network_interface_ids = [
+    azurerm_network_interface.nic.id
+  ]
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-focal"
+    sku       = "20_04-lts"
+    version   = "latest"
+  }
+}
+
+resource "azurerm_network_security_group" "nsg" {
+  name                = "mdc-nsg"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  security_rule {
+    name                       = "Allow-SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "nic_nsg" {
+  network_interface_id      = azurerm_network_interface.nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+```
+
+## ✅ Passo 4 – Inicializar o Terraform
+```bash
 terraform init
+```
 
-# Verificar plano de execução
+## 🔍 Passo 5 – Validar e revisar o plano
+```bash
+terraform validate
 terraform plan
+```
 
-# Aplicar configuração
+## 🚀 Passo 6 – Aplicar o código e provisionar
+```bash
 terraform apply
+```
+Confirme com `yes` quando solicitado.
 
-# Destruir recursos (quando necessário)
+## 🧼 Passo 7 – Destruir os recursos (opcional)
+```bash
 terraform destroy
 ```
 
 ---
-
-## Features Avançadas Incluídas
-
-### Segurança reforçada:
-- TLS 1.2 obrigatório
-- Network rules configuráveis
-- HTTPS obrigatório
-
-### Data Protection:
-- Versionamento de blobs
-- Change feed habilitado
-- Retention policy (30 dias)
-
-### Boas práticas:
-- Tags padronizadas
-- Outputs sensíveis marcados
-- Validação de nomes
-
-### Flexibilidade:
-- Tipo de replicação configurável
-- Tier (Standard/Premium) parametrizável
-
----
-
-## Para Ambiente Production:
-
-1. Crie um arquivo `production.tfvars` com:
-```hcl
-account_replication_type    = "GRS"
-enable_https_traffic_only  = true
-tags = {
-  Environment = "production"
-  Critical    = "true"
-}
-```
-
-2. Aplique com:
-```bash
-terraform apply -var-file="production.tfvars"
-```
-
+Esse lab aproveita um resource group existente e usa variáveis pra tornar o código mais flexível e fácil de reaproveitar. No próximo lab podemos separar a rede em um módulo reutilizável.
