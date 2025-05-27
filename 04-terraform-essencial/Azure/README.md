@@ -14,7 +14,7 @@ cd ~/labs/terraform/lab1-resource-group
 vi provider.tf
 ```
 Conteúdo:
-```hcl
+```t
 provider "azurerm" {
   features {}
 }
@@ -99,11 +99,12 @@ terraform {
 ```
 
 ## 📄 Passo 2 – Definir variáveis
-```t
+```bash
 vi variables.tf
 ```
+
 Conteúdo:
-```hcl
+```t
 variable "location" {
   default = "East US"
 }
