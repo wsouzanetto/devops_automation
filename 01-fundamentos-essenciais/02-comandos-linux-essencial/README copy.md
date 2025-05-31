@@ -523,6 +523,3 @@ ps aux | grep bash
 ## ✅ Conclusão da Parte 7
 
 Com esses comandos e práticas extras, você vai usar o terminal com mais agilidade, segurança e organização. Agora você já tem uma base sólida para dominar o Linux no dia a dia!
-
-Parabéns por concluir o lab completo! 🚀
-

@@ -383,7 +383,7 @@ cd ~/k8s-workshop/lab1
 ### 2. Criar o manifesto do Pod
 
 ```bash
-nano pod-java-api.yaml
+vi pod-java-api.yaml
 ```
 
 Cole o conteúdo abaixo no arquivo, com a porta correta:
