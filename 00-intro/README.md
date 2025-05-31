@@ -11,8 +11,6 @@ Este documento lista os pré-requisitos necessários para acompanhar todos os m�
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git curl unzip software-properties-common gnupg unzip
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y git curl unzip software-properties-common gnupg
 ```
 
 ### 2. Instale o Git e configure:
