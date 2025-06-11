@@ -2,7 +2,7 @@
 
 Este conjunto de labs práticos foi criado para te ensinar a usar Docker de forma eficiente no dia a dia de desenvolvimento e automação. Começaremos pelos comandos básicos e evoluiremos até troubleshooting, cópia de arquivos, criação de imagens personalizadas e uso do `docker-compose`.
 
----
+ 
 
 ## Pré-requisitos
 
@@ -19,17 +19,17 @@ Verifique se o serviço está ativo:
 sudo systemctl status docker
 ```
 
----
+ 
 
-## Lab Docker – Versão para SSH (Ubuntu)
+## Lab Docker
 
 ### 🎯 Objetivo
 
 Executar os comandos básicos do Docker sem perder acesso ao terminal via SSH
 
----
+ 
 
-## Lab 2 – Comandos Básicos com Segurança Remota
+## Lab 1 – Comandos Básicos com Segurança Remota
 
 ### 1. Baixar imagem do Nginx
 
@@ -74,72 +74,105 @@ docker rm webserver
 docker rmi nginx
 ```
 
-### Evite comandos interativos diretos em SSH
+## Lab 2 – Docker com Python e FastAPI
+
+### 1. Criar estrutura do projeto
 
 ```bash
-docker run -it ubuntu bash
+mkdir -p ~/labs/docker/fastapi-app
+cd ~/labs/docker/fastapi-app
 ```
 
-📌 Sempre prefira `-d` e `docker exec` para ambientes remotos
+* Cria o diretório principal da aplicação.
 
+### 2. Criar arquivos da aplicação
 
----
+#### Criar o arquivo principal
 
-## Lab 3 – Reutilizando containers com `exec`
-
-### 1. Ver containers existentes
 ```bash
-docker ps -a
+touch main.py
 ```
 
-### 2. Iniciar um container parado
+#### Conteúdo do `main.py`
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello from a Dockerized FastAPI app!"}
+```
+
+### 3. Criar o arquivo `requirements.txt`
+
 ```bash
-docker start <id ou nome>
+echo -e "fastapi\nuvicorn" > requirements.txt
 ```
 
-### 3. Acessar o terminal de um container já iniciado
+* Define as dependências da aplicação.
+
+
+### 4. Criar o Dockerfile
+
+```Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### 5. Build da imagem
+
 ```bash
-docker exec -it <id ou nome> bash
+docker build -t fastapi-app .
 ```
 
----
+### 6. Executar o container
 
-## Lab 4 – Limpeza e manutenção
-
-### 1. Remover container específico
 ```bash
-docker rm <id ou nome>
+docker run -d -p 8000:8000 fastapi-app
 ```
 
-### 2. Remover imagem específica
+### 7. Testar e visualizar logs
+
+#### Testar via curl:
+
 ```bash
-docker rmi <imagem>
+curl http://localhost:8000/
 ```
 
-### 3. Limpar containers, volumes e imagens não utilizados
+* Retorno esperado:
+
+```json
+{"message":"Hello from a Dockerized FastAPI app!"}
+```
+
+#### Ver logs:
+
 ```bash
-docker system prune -a
+docker logs $(docker ps -q --filter ancestor=fastapi-app)
 ```
 
----
+### 8. Parar e remover o container (opcional)
 
-## Lab 5 – Copiar arquivos entre host e container
-
-### 1. Copiar do host para o container
 ```bash
-docker cp meu_script.sh <id>:/root/
+docker ps -q --filter ancestor=fastapi-app | xargs docker stop | xargs docker rm
 ```
 
-### 2. Copiar do container para o host
-```bash
-docker cp <id>:/root/arquivo.log ./arquivo.log
-```
 
----
+## Lab 3 – Docker Multistage com Node.js
 
-## Lab 6 – Visualização de logs e debug
-
-## 📁 1. Criar estrutura do projeto
+### 1. Criar estrutura do projeto
 
 ```bash
 mkdir -p ~/labs/docker/app
@@ -149,11 +182,10 @@ cd ~/labs/docker/app
 * `mkdir -p` cria o diretório principal do projeto.
 * `cd` navega até o diretório principal.
 
----
 
-## ✍️ 2. Criar arquivos da aplicação
+### 2. Criar arquivos da aplicação
 
-### Criar o diretório e o arquivo principal:
+#### Criar o diretório e o arquivo principal:
 
 ```bash
 mkdir -p src
@@ -163,7 +195,7 @@ touch src/index.js
 * `mkdir -p src` garante que o diretório `src` existe.
 * `touch src/index.js` cria o arquivo principal da aplicação.
 
-### Editar o conteúdo do `index.js`:
+#### Editar o conteúdo do `index.js`:
 
 ```javascript
 const http = require('http');
@@ -181,17 +213,16 @@ server.listen(PORT, () => {
 
 * Esse código cria um servidor web simples em Node.js que responde com texto puro.
 
----
 
-## 📦 3. Criar o arquivo `package.json`
+### 3. Criar o arquivo `package.json`
 
-### Criar o arquivo:
+#### Criar o arquivo:
 
 ```bash
 touch package.json
 ```
 
-### Adicionar o conteúdo abaixo ao `package.json`:
+#### Adicionar o conteúdo abaixo ao `package.json`:
 
 ```json
 {
@@ -207,19 +238,11 @@ touch package.json
 
 * Esse arquivo define as informações básicas da aplicação e o comando para iniciar.
 
----
-```
-Pronto! Agora você tem uma aplicação Node.js com estrutura organizada, pronta para ser dockerizada. Na próxima etapa, vamos criar o `Dockerfile` e subir esse app em um container.
-
-Deseja seguir para o Dockerfile?
-
-```
-
-
 ### 4. Criar Dockerfile otimizado
+
 ```Dockerfile
 # Etapa 1: build da aplicação (instalação de dependências)
-FROM node:18-alpine AS builder
+FROM node:18 AS builder
 WORKDIR /app
 COPY src/package.json ./
 RUN npm install
@@ -234,208 +257,303 @@ CMD ["npm", "start"]
 ```
 
 ### 5. Build da imagem
+
 ```bash
 docker build -t devopsautomation:latest .
 ```
 
 ### 6. Executar a imagem
+
 ```bash
-docker run -p 3000:3000 devopsautomation:latest
+docker run -d -p 3000:3000 devopsautomation:latest
 ```
 
-Você pode acessar a aplicação no navegador: [http://localhost:3000](http://localhost:3000)
+### 7. Validar e visualizar logs
 
----
+#### Testar a aplicação via curl:
 
-## Lab 8 – Criando imagem multistage
-
-### 1. Criar estrutura
 ```bash
-mkdir -p ~/labs/docker/multistage
-cd ~/labs/docker/multistage
+curl http://localhost:3000
 ```
 
-### 2. Criar arquivo do app
+* O retorno esperado é: `Hello from a professional Docker container!`
+
+#### Ver logs do container:
+
 ```bash
-echo 'console.log("Build otimizado!")' > index.js
+docker logs $(docker ps -q --filter ancestor=devopsautomation:latest)
 ```
 
-### 3. Criar Dockerfile multistage:
-```Dockerfile
-FROM node:18-alpine AS build
-WORKDIR /src
-COPY index.js .
+* Deve exibir algo como:
 
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=build /src/index.js .
-CMD ["node", "index.js"]
-```
-
-### 4. Build e execução:
 ```bash
-docker build -t devopsautomation:multi .
-docker run devopsautomation:multi
+Servidor rodando na porta 3000
 ```
 
----
+### 8. Parar e remover o container (opcional)
 
-## Lab 9 – Enviar imagem para o Docker Hub
+```bash
+docker ps -q --filter ancestor=devopsautomation:latest | xargs docker stop | xargs docker rm
+```
 
-### 1. Autenticar no Docker Hub
+## Lab 4 – Criando um .gitignore para Projetos Docker com Node.js
+
+### 1. Reutilizando o Projeto Existente
+
+Vamos aproveitar o projeto criado no **Lab 3 – Docker Multistage com Node.js**. Navegue até o diretório base do projeto:
+
+```bash
+cd ~/labs
+```
+
+Inicialize o repositório na raiz (caso ainda não exista):
+
+```bash
+git init
+```
+
+> Importante: toda a estrutura do projeto está em `docker/app/`
+
+### 2. Criar o arquivo `.gitignore` na raiz do repositório
+
+```bash
+touch .gitignore
+```
+
+Adicione as regras considerando a estrutura do projeto:
+
+```gitignore
+# Ignorar arquivos sensíveis e temporários dentro de docker/app
+/docker/app/node_modules/
+/docker/app/dist/
+/docker/app/*.log
+/docker/app/.env
+/docker/app/.env*
+
+# Pycache, logs e arquivos temporários em geral
+**/__pycache__/
+**/*.pyc
+.DS_Store
+*.tgz
+```
+
+### 3. Testar comportamento do .gitignore
+
+Crie arquivos simulando um ambiente real:
+
+```bash
+mkdir docker/app/node_modules
+mkdir docker/app/dist
+echo "segredo=abc" > docker/app/.env
+```
+
+Verifique com `git status`:
+
+```bash
+git status
+```
+
+* Os arquivos/pastas criados não devem aparecer como "Untracked files"
+
+### 4. Adicionar e versionar apenas os arquivos necessários
+
+```bash
+git add .
+git status
+```
+
+Confirme que apenas os arquivos relevantes estão sendo versionados, como:
+
+* `.gitignore`
+* `docker/app/dockerfile`
+* `docker/app/src/index.js`
+* `docker/app/src/package.json`
+
+```bash
+git commit -m "Configuração inicial com .gitignore para estrutura Docker/Node"
+```
+
+### 5. Verificar arquivos ignorados
+
+```bash
+git check-ignore -v docker/app/.env docker/app/node_modules/
+```
+
+## Lab 8 – Fazendo Push da Imagem Docker para o Docker Hub
+
+### 1. Pré-requisitos
+
+* Ter uma conta no [Docker Hub](https://hub.docker.com/)
+* Ter feito login local com o Docker CLI:
+
 ```bash
 docker login
 ```
 
-### 2. Taguear a imagem antes de enviar
+### 2. Reutilizar a imagem do projeto
+
+Vamos usar a imagem criada no **Lab 3 – Docker Multistage com Node.js**
+
+Acesse a pasta do projeto:
+
 ```bash
-docker tag devopsautomation:multi seuusuario/devopsautomation:1.0
+cd ~/labs/docker/app
 ```
 
-### 3. Enviar a imagem
-```bash
-docker push seuusuario/devopsautomation:1.0
+### 3. Taguear a imagem com o nome do repositório remoto
+
+O padrão é:
+
+```
+<username-dockerhub>/<nome-repositorio>:<tag>
 ```
 
----
+Exemplo:
 
-## Lab 10 – Docker Compose com rede e múltiplos containers
-
-### 1. Criar diretório do lab
 ```bash
-mkdir -p ~/labs/docker/network-demo
-cd ~/labs/docker/network-demo
+docker tag devopsautomation:latest iesodias/docker-node-app:1.0.0
 ```
 
-### 2. Criar `docker-compose.yml`
-Crie o arquivo:
+### 4. Fazer o push da imagem
+
 ```bash
-touch docker-compose.yml
+docker push iesodias/docker-node-app:1.0.0
 ```
-Abra e cole o conteúdo a seguir:
+
+Se quiser enviar como `latest` também:
+
+```bash
+docker tag devopsautomation:latest iesodias/docker-node-app:latest
+docker push iesodias/docker-node-app:latest
+```
+
+### 5. Verificar no Docker Hub
+
+Acesse seu repositório no Docker Hub e confirme se as tags aparecem corretamente.
+
+
+### 6. Baixar de qualquer lugar (simulando ambiente remoto)
+
+Em qualquer host com Docker instalado:
+
+```bash
+docker pull iesodias/docker-node-app:1.0.0
+docker run -p 3000:3000 iesodias/docker-node-app:1.0.0
+```
+
+### 7. Dica: Remover imagem local (simula CI/CD limpo)
+
+```bash
+docker rmi iesodias/docker-node-app:1.0.0
+```
+
+## Lab 9 – Orquestrando com Docker Compose
+
+### 1. Objetivo
+
+Utilizar Docker Compose para subir uma aplicação Node.js junto com um banco de dados PostgreSQL, simulando um ambiente completo de desenvolvimento.
+
+### 2. Estrutura do projeto
+
+Aproveitando o projeto do **Lab 3**, vamos usar esta estrutura:
+
+```
+docker-compose-lab/
+├── docker-compose.yml
+└── app/
+    ├── dockerfile
+    └── src/
+        ├── index.js
+        └── package.json
+```
+
+### 3. Criar o `docker-compose.yml`
+
+Na raiz do projeto `docker-compose-lab/`, crie o arquivo:
 
 ```yaml
 version: '3.8'
 
 services:
-  app1:
-    image: nginx
-    container_name: app1
-    networks:
-      - appnet
-
-  app2:
-    image: nginx
-    container_name: app2
-    networks:
-      - appnet
-
-  app3:
-    image: nginx
-    container_name: app3
-    networks:
-      - appnet
-
-networks:
-  appnet:
-    driver: bridge
-```
-
-### 3. Subir os containers
-```bash
-docker compose up -d
-```
-
-### 4. Verificar os containers e a rede
-```bash
-docker compose ps
-docker network inspect network-demo_appnet
-```
-
-Você verá os IPs dos três containers atribuídos automaticamente pela rede bridge `appnet`.
-
-### 5. Acessar os containers e testar conectividade
-
-Entre no `app1`:
-```bash
-docker exec -it app1 bash
-```
-
-Dentro do container:
-```bash
-apt update && apt install -y iputils-ping
-ping app2 -c 3
-ping app3 -c 3
-exit
-```
-
-### 6. Parar e remover os serviços
-```bash
-docker compose down
-```
-
-### Fim do Lab 11
-
----
-
-## Lab 11 – Testando persistência de dados com volumes
-
-### 1. Criar diretório do lab
-```bash
-mkdir -p ~/labs/docker/volumes-demo
-cd ~/labs/docker/volumes-demo
-```
-
-### 2. Criar `docker-compose.yml`
-```bash
-touch docker-compose.yml
-```
-
-Abra o arquivo e cole o conteúdo:
-
-```yaml
-version: '3.8'
-
-services:
-  db:
-    image: mysql:5.7
-    container_name: mysqldb
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: testdb
-    volumes:
-      - dbdata:/var/lib/mysql
+  node-app:
+    build:
+      context: ./app
+      dockerfile: dockerfile
     ports:
-      - "3306:3306"
+      - "3000:3000"
+    container_name: node_compose_app
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://devuser:devpass@db:5432/devdb
+
+  db:
+    image: postgres:15
+    container_name: postgres_compose_db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: devdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
 volumes:
-  dbdata:
+  pgdata:
 ```
 
-### 3. Subir o banco com volume
+### 4. Subir a aplicação com Docker Compose
+
 ```bash
-docker compose up -d
+docker-compose up -d
 ```
 
-### 4. Acessar o banco
+### 5. Validar funcionamento da aplicação
+
 ```bash
-docker exec -it mysqldb bash
-mysql -uroot -proot
+curl http://localhost:3000
 ```
 
-### 5. Criar uma tabela para teste
+Retorno esperado:
+
+```text
+Hello from a professional Docker container!
+```
+
+### 6. Acessar o banco de dados
+
+```bash
+docker exec -it postgres_compose_db psql -U devuser -d devdb
+```
+
+Exemplo de comando dentro do PostgreSQL:
+
 ```sql
-USE testdb;
-CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100));
-INSERT INTO users (name) VALUES ('Maria'), ('João');
-SELECT * FROM users;
+\l  -- lista os bancos
+\dt -- lista as tabelas
 ```
 
-### 6. Remover os containers
+### 7. Verificar status dos containers
+
 ```bash
-docker compose down
+docker-compose ps
 ```
 
+### 8. Ver logs da aplicação
 
----
+```bash
+docker-compose logs -f node-app
+```
+
+### 9. Parar e remover os containers
+
+```bash
+docker-compose down -v
+```
+
+Este lab mostra como usar Docker Compose para orquestrar uma aplicação Node.js com PostgreSQL, preparando uma base sólida para ambientes de desenvolvimento modernos.
+
+ 
