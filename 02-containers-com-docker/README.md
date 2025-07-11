@@ -235,6 +235,15 @@ touch package.json
   "dependencies": {}
 }
 ```
+- Estrutura das pastas
+```bash
+➜  tree
+.
+├── dockerfile
+└── src
+    ├── index.js
+    └── package.json
+```
 
 * Esse arquivo define as informações básicas da aplicação e o comando para iniciar.
 
